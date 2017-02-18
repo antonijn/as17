@@ -3,3 +3,7 @@
 bin_path="$(dirname $(readlink -f $0))"
 
 cat $@ | "$bin_path/as17_0" > a.out
+
+if [ $? -ne 0 ]; then
+	rm -f a.out
+fi
