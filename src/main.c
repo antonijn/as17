@@ -229,13 +229,12 @@ static int
 isdigit_b(int ch, int base)
 {
 	if (isdigit(ch))
-		return -1;
+		return 1;
 
 	if (base > 10) {
-		ch = toupper(ch);
-		ch -= 'A';
+		ch = toupper(ch) - 'A';
 		if (ch >= 0 && ch < (base - 10))
-			return -1;
+			return 1;
 	}
 
 	return 0;
