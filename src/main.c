@@ -1218,6 +1218,202 @@ assemble_alu(struct instr *instr, unsigned opcode)
 }
 
 static int
+assemble_cmpf(struct instr *instr)
+{
+	unsigned ra, c10a, rb, c10b;
+	struct value_nd *fst, *snd;
+	int a_is_imm, b_is_imm;
+
+	fst = instr->ops;
+	if (expect(instr, fst) < 0)
+		return -1;
+
+	a_is_imm = expect_imm(instr, &fst->val, &c10a, 0) == 0;
+	if (!a_is_imm && expect_reg(instr, &fst->val, &ra, 1) < 0)
+		return -1;
+
+	snd = fst->next;
+	if (expect(instr, snd) < 0)
+		return -1;
+
+	if (!a_is_imm)
+		b_is_imm = expect_imm(instr, &snd->val, &c10b, 0) == 0;
+
+	if ((a_is_imm || !b_is_imm) && expect_reg(instr, &snd->val, &rb, 1) < 0)
+		return -1;
+
+	if (dontexpect(instr, snd->next) < 0)
+		return -1;
+
+	if (b_is_imm) {
+		/* ADDF -c10b, Ra, ZERO */
+		c10b = ~c10b + 1;
+		emit_arith_imm(0x6, 1, c10b & 0x3FF, ra, 0, instr->cond);
+	} else if (a_is_imm) {
+		/* SUBF c10a, Rb, ZERO */
+		emit_arith_imm(0x7, 1, c10a & 0x3FF, rb, 0, instr->cond);
+	} else {
+		/* SUBF Ra, Rb, ZERO */
+		emit_arith_reg(0x7, 1, ra, rb, 0, instr->cond);
+	}
+
+	return 0;
+}
+
+static int
+assemble_jump(struct instr *instr)
+{
+	unsigned c10;
+	struct value_nd *fst;
+
+	fst = instr->ops;
+	if (expect(instr, fst) < 0 || expect_imm(instr, &fst->val, &c10, 1) < 0)
+		return -1;
+
+	if (dontexpect(instr, fst->next) < 0)
+		return -1;
+
+	/* ADD c10, R14, R14 */
+	emit_arith_reg(0x6, 0, c10 & 0x3FF, 14, 14, instr->cond);
+	return 0;
+}
+
+static int
+assemble_move(struct instr *instr)
+{
+	int flg = toupper(instr->mnem[strlen(instr->mnem) - 1]) == 'F';
+	unsigned c10, ra, rd;
+	struct value_nd *fst, *snd, *trd;
+
+	fst = instr->ops;
+	if (expect(instr, fst) < 0)
+		return -1;
+
+	expect_imm(instr, &fst->val, &c10, 0);
+	expect_reg(instr, &fst->val, &ra, 0);
+
+	snd = fst->next;
+	if (expect(instr, snd) < 0 || expect_reg(instr, &snd->val, &rd, 1) < 0)
+		return -1;
+
+	if (dontexpect(instr, snd->next) < 0)
+		return -1;
+
+	switch (fst->val.kind) {
+	case VK_REG:
+		/* OR Ra, ZERO, Rd */
+		emit_arith_reg(0x0, flg, ra, 0, rd, instr->cond);
+		break;
+	case VK_IMM:
+	case VK_LABEL:
+		/* OR c10, ZERO, Rd */
+		emit_arith_imm(0x0, flg, c10 & 0x3FF, 0, rd, instr->cond);
+		break;
+	default:
+		assembler_err(instr, "expected register or immediate constant");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int
+assemble_neg(struct instr *instr)
+{
+	int flg = toupper(instr->mnem[strlen(instr->mnem) - 1]) == 'F';
+	unsigned ra, rd;
+	struct value_nd *fst, *snd, *trd;
+
+	fst = instr->ops;
+	if (expect(instr, fst) < 0 || expect_reg(instr, &fst->val, &ra, 1) < 0)
+		return -1;
+
+	snd = fst->next;
+	if (expect(instr, snd) < 0 || expect_reg(instr, &snd->val, &rd, 1) < 0)
+		return -1;
+
+	if (dontexpect(instr, snd->next) < 0)
+		return -1;
+
+	/* SUB 0, Ra, Rd */
+	emit_arith_imm(0x7, flg, 0, ra, rd, instr->cond);
+	return 0;
+}
+
+static int
+assemble_nop(struct instr *instr)
+{
+	if (dontexpect(instr, instr->ops) < 0)
+		return -1;
+
+	if (instr->cond != 0) {
+		assembler_err(instr, "a no-op may not have a non-true condition");
+		return -1;
+	}
+
+	/* OR 0, ZERO, ZERO */
+	emit_arith_imm(0x0, 0, 0, 0, 0, 0);
+	return 0;
+}
+
+static int
+assemble_not(struct instr *instr)
+{
+	int flg = toupper(instr->mnem[strlen(instr->mnem) - 1]) == 'F';
+	unsigned ra, rd;
+	struct value_nd *fst, *snd, *trd;
+
+	fst = instr->ops;
+	if (expect(instr, fst) < 0 || expect_reg(instr, &fst->val, &ra, 1) < 0)
+		return -1;
+
+	snd = fst->next;
+	if (expect(instr, snd) < 0 || expect_reg(instr, &snd->val, &rd, 1) < 0)
+		return -1;
+
+	if (dontexpect(instr, snd->next) < 0)
+		return -1;
+
+	/* XOR -1, Ra, Rd */
+	emit_arith_imm(0x1, flg, 0x3FF, ra, rd, instr->cond);
+	return 0;
+}
+
+static int
+assemble_ret(struct instr *instr)
+{
+	if (dontexpect(instr, instr->ops) < 0)
+		return -1;
+
+	/* OR 0, ZERO, ZERO */
+	emit_pop(14, instr->cond);
+	return 0;
+}
+
+static int
+assemble_ror(struct instr *instr)
+{
+	int flg = toupper(instr->mnem[strlen(instr->mnem) - 1]) == 'F';
+	unsigned c10, ra, rb, rd;
+	struct value_nd *fst, *snd, *trd;
+
+	fst = instr->ops;
+	if (expect(instr, fst) < 0 || expect_imm(instr, &fst->val, &c10, 1) < 0)
+		return -1;
+
+	snd = fst->next;
+	if (expect(instr, snd) < 0 || expect_reg(instr, &snd->val, &rb, 1) < 0)
+		return -1;
+
+	trd = snd->next;
+	if (expect(instr, trd) < 0 || expect_reg(instr, &trd->val, &rd, 1) < 0)
+		return -1;
+
+	emit_arith_imm(0x5, flg, -c10 & 0x1F, rb, rd, instr->cond);
+	return 0;
+}
+
+static int
 assemble_instr(struct instr *instr)
 {
 	if (!ci_strcmp(instr->mnem, "HALT"))
@@ -1258,6 +1454,32 @@ assemble_instr(struct instr *instr)
 
 	if (!ci_strcmp(instr->mnem, "SUB") || !ci_strcmp(instr->mnem, "SUBF"))
 		return assemble_alu(instr, 0x7);
+
+	/* translated instructions */
+
+	if (!ci_strcmp(instr->mnem, "CMPF"))
+		return assemble_cmpf(instr);
+
+	if (!ci_strcmp(instr->mnem, "JUMP"))
+		return assemble_jump(instr);
+
+	if (!ci_strcmp(instr->mnem, "MOVE") || !ci_strcmp(instr->mnem, "MOVEF"))
+		return assemble_move(instr);
+
+	if (!ci_strcmp(instr->mnem, "NEG") || !ci_strcmp(instr->mnem, "NEGF"))
+		return assemble_neg(instr);
+
+	if (!ci_strcmp(instr->mnem, "NOP"))
+		return assemble_nop(instr);
+
+	if (!ci_strcmp(instr->mnem, "NOT") || !ci_strcmp(instr->mnem, "NOTF"))
+		return assemble_not(instr);
+
+	if (!ci_strcmp(instr->mnem, "RET"))
+		return assemble_ret(instr);
+
+	if (!ci_strcmp(instr->mnem, "ROR") || !ci_strcmp(instr->mnem, "RORF"))
+		return assemble_ror(instr);
 
 	assembler_err(instr, "unknown instruction");
 	return -1;
