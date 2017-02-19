@@ -23,3 +23,11 @@ clean:
 
 install:
 	cp as17 as17_0 $(PREFIX)/bin
+
+MANPAGES = man/as17.1
+RONN = ronn
+
+man: $(MANPAGES)
+
+%.1: %.1.ronn
+	$(RONN) $^

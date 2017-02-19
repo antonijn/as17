@@ -1,0 +1,61 @@
+as17(1) - assembler for the fictional RUN1617 CPU
+=================================================
+
+## SYNOPSIS
+`as17` [-f <format>] [-o <output>] <file>...
+
+## DESCRIPTION
+**as17** is an assembler for the RUN1617 CPU. All input files are
+concatenated in order, and output starts at the first instruction in
+the first file in the file list.
+
+## OPTIONS
+
+  * `-f`:
+    With the `bin` option, outputs binary instruction codes (default).
+    With the `hd` option, outputs a hexdump of the instruction codes.
+
+  * `-o`:
+    Specify output file. Default is `a.out`.
+
+## LANGUAGE
+Assembly labels are case-insensitive, instructions and register names
+are not. Every instruction may carry at most one label. Labels may be
+any valid word starting with an alphabetic character or an underscore,
+followed by a combination of alphanumeric characters or underscores. Note
+that full stops are not valid in label names.
+
+Also invalid as label names are the keywords `zero`, `rsp`, `rip` and
+any word starting with a combination of an `r` followed by a numeric
+character.  Any capitalization of the above exceptions are also invalid
+label names.
+
+`zero`, `rsp` and `rip` are aliases for `r0`, `r14` and `r15` respectively.
+
+### EXAMPLE
+
+	mul:
+		ANDf R2, R2, ZERO
+		MOVE.Z 0, R1
+		RET.Z
+
+		PUSH R3
+		MOVE R2, R3
+
+	_loop:
+		ANDf R2, R2, ZERO
+		POP.Z R3
+		RET.Z
+
+		ANDf 1, R2, ZERO
+		ADD.NZ R1, R3, R1
+		XORf.NZ 1, R2, R2
+
+		ROR 1, R2, R2
+		ROL 1, R3, R3
+		JUMP _loop
+
+## COPYRIGHT
+
+as17 is Copyright (C) 2017 Antonie Blom. It is licensed under the terms
+of the GNU General Public License version 2.

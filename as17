@@ -6,7 +6,7 @@ fmt=bin
 output=a.out
 
 usage () {
-	echo "Usage: as17 [-f bin] [-f hd] <input>..."
+	echo "Usage: as17 [-f <format>] [-o <output>] <file>..."
 }
 
 while grep <<< "$1" -q ^-; do
