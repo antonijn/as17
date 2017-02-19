@@ -19,7 +19,7 @@ the first file in the file list.
     Specify output file. Default is `a.out`.
 
 ## LANGUAGE
-Assembly labels are case-insensitive, instructions and register names
+Assembly labels are case-sensitive, instructions and register names
 are not. Every instruction may carry at most one label. Labels may be
 any valid word starting with an alphabetic character or an underscore,
 followed by a combination of alphanumeric characters or underscores. Note
