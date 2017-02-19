@@ -1,0 +1,21 @@
+
+AS17 -- ASSEMBLER FOR THE FICTIONAL RUN1617 CPU
+===============================================
+
+  BUILD & INSTALL
+
+Run the following commands:
+
+	make && sudo make install
+
+You may optionally set PREFIX to a custom installation prefix:
+
+	make && sudo make install PREFIX=/home/xxx/local
+
+This also installs the man pages to PREFIX/share/man/man1. To rebuild the
+man pages, run:
+
+	make man
+
+This requires the ronn program: https://github.com/rtomayko/ronn
+
