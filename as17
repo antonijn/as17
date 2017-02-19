@@ -2,8 +2,47 @@
 
 bin_path="$(dirname $(readlink -f $0))"
 
-cat $@ | "$bin_path/as17_0" > a.out
+fmt=bin
+output=a.out
 
-if [ $? -ne 0 ]; then
-	rm -f a.out
+usage () {
+	echo "Usage: as17 [-f bin] [-f hd] <input>..."
+}
+
+while grep <<< "$1" -q ^-; do
+	case "$1" in
+	-f)
+		shift
+		if [ "$1" != "bin" ] && [ "$1" != "hd" ]; then
+			echo >&2 "Unknown format \`$1'"
+			echo >&2 "Valid are: bin, hd"
+			exit 1
+		fi
+		fmt=$1
+		;;
+
+	-o)
+		shift
+		output=$1
+		;;
+
+	--help)
+		usage
+		exit
+		;;
+
+	*)
+		usage >&2
+		exit 1
+		;;
+	esac
+	shift
+done
+
+set -e
+
+if [ $fmt = hd ]; then
+	cat $@ | "$bin_path/as17_0" | od -vAn -t x1 > $output
+else
+	cat $@ | "$bin_path/as17_0" > $output
 fi
