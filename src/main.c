@@ -1201,6 +1201,9 @@ assemble_alu(struct instr *instr, unsigned opcode)
 	if (expect(instr, trd) < 0 || expect_reg(instr, &trd->val, &rd, 1) < 0)
 		return -1;
 
+	if (dontexpect(instr, trd->next) < 0)
+		return -1;
+
 	switch (fst->val.kind) {
 	case VK_REG:
 		emit_arith_reg(opcode, flg, ra, rb, rd, instr->cond);
