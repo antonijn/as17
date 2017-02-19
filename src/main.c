@@ -341,62 +341,65 @@ lxadv(void)
 	if (isdigit(cur_char) || cur_char == '-')
 		return lxreadnum();
 
-	if (cur_char == '.') {
+	switch (cur_char) {
+	case '.':
 		cur_tok.kind = TK_DOT;
 		strcpy(cur_tok.lexeme, ".");
 		lxadvch();
-		return 0;
-	}
+		break;
 
-	if (cur_char == ',') {
+	case ',':
 		cur_tok.kind = TK_COMMA;
 		strcpy(cur_tok.lexeme, ",");
 		lxadvch();
-		return 0;
-	}
+		break;
 
-	if (cur_char == '[') {
+	case '[':
 		cur_tok.kind = TK_LSQRBRACKET;
 		strcpy(cur_tok.lexeme, "[");
 		lxadvch();
-		return 0;
-	}
-	if (cur_char == ']') {
+		break;
+	case ']':
 		cur_tok.kind = TK_RSQRBRACKET;
 		strcpy(cur_tok.lexeme, "]");
 		lxadvch();
-		return 0;
-	}
+		break;
 
-	if (cur_char == '+') {
+	case '+':
 		cur_tok.kind = TK_PLUS;
 		strcpy(cur_tok.lexeme, "+");
 		lxadvch();
-		return 0;
-	}
+		break;
 
-	if (cur_char == ':') {
+	case ':':
 		cur_tok.kind = TK_COLON;
 		strcpy(cur_tok.lexeme, ":");
 		lxadvch();
-		return 0;
-	}
+		break;
 
-	if (cur_char == '\n') {
+	case '\n':
 		++cur_line;
 		cur_tok.kind = TK_EOL;
 		strcpy(cur_tok.lexeme, "\n");
 		lxadvch();
-		return 0;
-	}
+		break;
 
-	if (cur_char == EOF) {
+	case ';':
+		while (cur_char != '\n' && cur_char != EOF)
+			lxadvch();
+
+		return lxadv();
+
+	case EOF:
 		cur_tok.kind = TK_EOF;
-		return 0;
+		break;
+
+	default:
+		parser_err("unexpected character");
+		return -1;
 	}
 
-	parser_err("unexpected character");
-	return -1;
+	return 0;
 }
 
 /* Initialize the lexer: set `cur_tok' to the first token in `stdin' */

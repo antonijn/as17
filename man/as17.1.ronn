@@ -32,8 +32,12 @@ label names.
 
 `zero`, `rsp` and `rip` are aliases for `r0`, `r14` and `r15` respectively.
 
+If a semicolon is encountered, the rest of the line is ignored.
+
 ### EXAMPLE
 
+	; Multiply two values
+	; R1 <- R1 * R2
 	mul:
 		ANDf R2, R2, ZERO
 		MOVE.Z 0, R1
