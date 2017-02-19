@@ -7,6 +7,8 @@ OBJECTS = src/main.o
 
 PREFIX = /usr/local
 
+all: release man
+
 release: CFLAGS += -DNDEBUG -O2
 debug: CFLAGS += -g
 
@@ -20,8 +22,9 @@ $(TARGET): $(OBJECTS)
 
 install:
 	cp as17 as17_0 $(PREFIX)/bin
+	cp -r man $(PREFIX)/share/
 
-MANPAGES = man/as17.1
+MANPAGES = man/man1/as17.1
 RONN = ronn
 RONNFLAGS = -r
 

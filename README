@@ -6,16 +6,17 @@ AS17 -- ASSEMBLER FOR THE FICTIONAL RUN1617 CPU
 
 Run the following commands:
 
-	make && sudo make install
+	make all && sudo make install
 
 You may optionally set PREFIX to a custom installation prefix:
 
-	make && sudo make install PREFIX=/home/xxx/local
+	make all && sudo make install PREFIX=/home/xxx/local
 
-This also installs the man pages to PREFIX/share/man/man1. To rebuild the
-man pages, run:
+`make install` also installs the man pages to PREFIX/share/man/man1.
 
-	make man
+Note that `make all` requires the ronn program:
+https://github.com/rtomayko/ronn
 
-This requires the ronn program: https://github.com/rtomayko/ronn
+If you do not wish to build the man pages you can run `make release`
+instead of `make all`.
 
