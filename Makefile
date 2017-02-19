@@ -18,16 +18,17 @@ $(TARGET): $(OBJECTS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-clean:
-	rm -f $(TARGET) $(OBJECTS)
-
 install:
 	cp as17 as17_0 $(PREFIX)/bin
 
 MANPAGES = man/as17.1
 RONN = ronn
+RONNFLAGS = -r
 
 man: $(MANPAGES)
 
 %.1: %.1.ronn
-	$(RONN) $^
+	$(RONN) $(RONNFLAGS) $^
+
+clean:
+	rm -f $(TARGET) $(OBJECTS) $(MANPAGES)
