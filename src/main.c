@@ -1279,8 +1279,8 @@ assemble_jump(struct instr *instr)
 	if (dontexpect(instr, fst->next) < 0)
 		return -1;
 
-	/* ADD c10, R14, R14 */
-	emit_arith_reg(0x6, 0, c10 & 0x3FF, 14, 14, instr->cond);
+	/* ADD c10, R15, R15 */
+	emit_arith_reg(0x6, 0, c10 & 0x3FF, 15, 15, instr->cond);
 	return 0;
 }
 
@@ -1391,8 +1391,8 @@ assemble_ret(struct instr *instr)
 	if (dontexpect(instr, instr->ops) < 0)
 		return -1;
 
-	/* OR 0, ZERO, ZERO */
-	emit_pop(14, instr->cond);
+	/* POP R15 */
+	emit_pop(15, instr->cond);
 	return 0;
 }
 
