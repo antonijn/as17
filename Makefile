@@ -35,3 +35,6 @@ man: $(MANPAGES)
 
 clean:
 	rm -f $(TARGET) $(OBJECTS) $(MANPAGES)
+
+pages:
+	ronn -5 --pipe man/man1/as17.1.ronn > docs/index.html

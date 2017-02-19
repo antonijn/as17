@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>as17(1) - assembler for the fictional RUN1617 CPU</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#OPTIONS">OPTIONS</a>
+    <a href="#LANGUAGE">LANGUAGE</a>
+    <a href="#COPYRIGHT">COPYRIGHT</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>as17(1)</li>
+    <li class='tc'></li>
+    <li class='tr'>as17(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>as17</code> - <span class="man-whatis">assembler for the fictional RUN1617 CPU</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><code>as17</code> [-f <var>format</var>] [-o <var>output</var>] <var>file</var>...</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p><strong>as17</strong> is an assembler for the RUN1617 CPU. All input files are
+concatenated in order, and output starts at the first instruction in
+the first file in the file list.</p>
+
+<h2 id="OPTIONS">OPTIONS</h2>
+
+<dl>
+<dt class="flush"><code>-f</code></dt><dd><p>With the <code>bin</code> option, outputs binary instruction codes (default).
+With the <code>hd</code> option, outputs a hexdump of the instruction codes.</p></dd>
+<dt class="flush"><code>-o</code></dt><dd><p>Specify output file. Default is <code>a.out</code>.</p></dd>
+</dl>
+
+
+<h2 id="LANGUAGE">LANGUAGE</h2>
+
+<p>Assembly labels are case-insensitive, instructions and register names
+are not. Every instruction may carry at most one label. Labels may be
+any valid word starting with an alphabetic character or an underscore,
+followed by a combination of alphanumeric characters or underscores. Note
+that full stops are not valid in label names.</p>
+
+<p>Also invalid as label names are the keywords <code>zero</code>, <code>rsp</code>, <code>rip</code> and
+any word starting with a combination of an <code>r</code> followed by a numeric
+character.  Any capitalization of the above exceptions are also invalid
+label names.</p>
+
+<p><code>zero</code>, <code>rsp</code> and <code>rip</code> are aliases for <code>r0</code>, <code>r14</code> and <code>r15</code> respectively.</p>
+
+<p>If a semicolon is encountered, the rest of the line is ignored.</p>
+
+<h3 id="EXAMPLE">EXAMPLE</h3>
+
+<pre><code>; Multiply two values
+; R1 &lt;- R1 * R2
+mul:
+    ANDf R2, R2, ZERO
+    MOVE.Z 0, R1
+    RET.Z
+
+    PUSH R3
+    MOVE R2, R3
+
+_loop:
+    ANDf R2, R2, ZERO
+    POP.Z R3
+    RET.Z
+
+    ANDf 1, R2, ZERO
+    ADD.NZ R1, R3, R1
+    XORf.NZ 1, R2, R2
+
+    ROR 1, R2, R2
+    ROL 1, R3, R3
+    JUMP _loop
+</code></pre>
+
+<h2 id="COPYRIGHT">COPYRIGHT</h2>
+
+<p>as17 is Copyright (C) 2017 Antonie Blom. It is licensed under the terms
+of the GNU General Public License version 2.</p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'></li>
+    <li class='tc'>February 2017</li>
+    <li class='tr'>as17(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
