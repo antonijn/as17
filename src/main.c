@@ -65,7 +65,7 @@ struct value_nd {
 
 struct instr {
 	int line;
-	char *mnem;
+	char *mnem; /* uppercase */
 	unsigned cond;
 	int addr_offset;
 
@@ -726,6 +726,8 @@ parse_operand(struct value_nd **nd)
 static int
 parse_instr(struct instr_nd **nd, int *offs)
 {
+	int i;
+
 	struct tok label_tok, fst;
 	char *label, *mnem;
 	size_t mnem_size;
@@ -826,7 +828,10 @@ parse_instr(struct instr_nd **nd, int *offs)
 	mnem = malloc(mnem_size);
 	if (!mnem)
 		goto stop_new_nd;
-	memcpy(mnem, fst.lexeme, mnem_size);
+
+	/* mnemonic is stored in uppercase */
+	for (i = 0; i < mnem_size; ++i)
+		mnem[i] = toupper(fst.lexeme[i]);
 
 	new_nd->instr.mnem = mnem;
 	new_nd->instr.cond = cond;
@@ -1422,69 +1427,69 @@ assemble_ror(struct instr *instr)
 static int
 assemble_instr(struct instr *instr)
 {
-	if (!ci_strcmp(instr->mnem, "HALT"))
+	if (!strcmp(instr->mnem, "HALT"))
 		return assemble_halt(instr);
 
-	if (!ci_strcmp(instr->mnem, "READ"))
+	if (!strcmp(instr->mnem, "READ"))
 		return assemble_read(instr);
 
-	if (!ci_strcmp(instr->mnem, "WRITE"))
+	if (!strcmp(instr->mnem, "WRITE"))
 		return assemble_write(instr);
 
-	if (!ci_strcmp(instr->mnem, "PUSH"))
+	if (!strcmp(instr->mnem, "PUSH"))
 		return assemble_push(instr);
 
-	if (!ci_strcmp(instr->mnem, "POP"))
+	if (!strcmp(instr->mnem, "POP"))
 		return assemble_pop(instr);
 
-	if (!ci_strcmp(instr->mnem, "LOADHI"))
+	if (!strcmp(instr->mnem, "LOADHI"))
 		return assemble_loadhi(instr);
 
-	if (!ci_strcmp(instr->mnem, "OR") || !ci_strcmp(instr->mnem, "ORF"))
+	if (!strcmp(instr->mnem, "OR") || !strcmp(instr->mnem, "ORF"))
 		return assemble_alu(instr, 0x0);
 
-	if (!ci_strcmp(instr->mnem, "XOR") || !ci_strcmp(instr->mnem, "XORF"))
+	if (!strcmp(instr->mnem, "XOR") || !strcmp(instr->mnem, "XORF"))
 		return assemble_alu(instr, 0x1);
 
-	if (!ci_strcmp(instr->mnem, "AND") || !ci_strcmp(instr->mnem, "ANDF"))
+	if (!strcmp(instr->mnem, "AND") || !strcmp(instr->mnem, "ANDF"))
 		return assemble_alu(instr, 0x2);
 
-	if (!ci_strcmp(instr->mnem, "BIC") || !ci_strcmp(instr->mnem, "BICF"))
+	if (!strcmp(instr->mnem, "BIC") || !strcmp(instr->mnem, "BICF"))
 		return assemble_alu(instr, 0x3);
 
-	if (!ci_strcmp(instr->mnem, "ROL") || !ci_strcmp(instr->mnem, "ROLF"))
+	if (!strcmp(instr->mnem, "ROL") || !strcmp(instr->mnem, "ROLF"))
 		return assemble_alu(instr, 0x5);
 
-	if (!ci_strcmp(instr->mnem, "ADD") || !ci_strcmp(instr->mnem, "ADDF"))
+	if (!strcmp(instr->mnem, "ADD") || !strcmp(instr->mnem, "ADDF"))
 		return assemble_alu(instr, 0x6);
 
-	if (!ci_strcmp(instr->mnem, "SUB") || !ci_strcmp(instr->mnem, "SUBF"))
+	if (!strcmp(instr->mnem, "SUB") || !strcmp(instr->mnem, "SUBF"))
 		return assemble_alu(instr, 0x7);
 
 	/* translated instructions */
 
-	if (!ci_strcmp(instr->mnem, "CMPF"))
+	if (!strcmp(instr->mnem, "CMPF"))
 		return assemble_cmpf(instr);
 
-	if (!ci_strcmp(instr->mnem, "JUMP"))
+	if (!strcmp(instr->mnem, "JUMP"))
 		return assemble_jump(instr);
 
-	if (!ci_strcmp(instr->mnem, "MOVE") || !ci_strcmp(instr->mnem, "MOVEF"))
+	if (!strcmp(instr->mnem, "MOVE") || !strcmp(instr->mnem, "MOVEF"))
 		return assemble_move(instr);
 
-	if (!ci_strcmp(instr->mnem, "NEG") || !ci_strcmp(instr->mnem, "NEGF"))
+	if (!strcmp(instr->mnem, "NEG") || !strcmp(instr->mnem, "NEGF"))
 		return assemble_neg(instr);
 
-	if (!ci_strcmp(instr->mnem, "NOP"))
+	if (!strcmp(instr->mnem, "NOP"))
 		return assemble_nop(instr);
 
-	if (!ci_strcmp(instr->mnem, "NOT") || !ci_strcmp(instr->mnem, "NOTF"))
+	if (!strcmp(instr->mnem, "NOT") || !strcmp(instr->mnem, "NOTF"))
 		return assemble_not(instr);
 
-	if (!ci_strcmp(instr->mnem, "RET"))
+	if (!strcmp(instr->mnem, "RET"))
 		return assemble_ret(instr);
 
-	if (!ci_strcmp(instr->mnem, "ROR") || !ci_strcmp(instr->mnem, "RORF"))
+	if (!strcmp(instr->mnem, "ROR") || !strcmp(instr->mnem, "RORF"))
 		return assemble_ror(instr);
 
 	assembler_err(instr, "unknown instruction");
